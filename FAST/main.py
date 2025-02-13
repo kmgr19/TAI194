@@ -42,3 +42,12 @@ def actualizar(id:int, usuarioActualizado: dict): #se utiliza el parámetro obli
             usuarios[index].update(usuarioActualizado) #se actualiza el usuario
             return usuarios[index] #se regresa el usuario actualizado
     raise HTTPException(status_code = 404, detail = "El usuario no existe") #si no se encuentra el usuario se manda un mensaje de error    
+
+#ENDPOINT DELETE
+@app.delete("/usuarios/", tags = ["Operaciones CRUD"]) #DECLARAR LA RUTA DEL SERVIDOR
+def delete(id:int, usuarioEliminado: dict): #se utiliza el parámetro obligatorio y el diccionario que se va a actualizar que en este caso es el usuario
+    for index, usr in enumerate(usuarios): #se recorre la lista de usuarios y se enumeran para saber la posición
+        if usr["id"] == id: #se verifica que el id coincida en el parámetro
+            del usuarios[index] #se elimina el usuario
+            return {"mensaje": "Usuario eliminado"} #se regresa el mensaje de usuario eliminado
+    raise HTTPException(status_code = 404, detail = "El usuario no existe") #te manda un mensaje en caso de que no se encuentre el ususario o ya se haa eliminado       
