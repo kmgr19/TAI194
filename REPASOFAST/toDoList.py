@@ -25,3 +25,12 @@ def home():
 def leer():
     return {'Tareas Registradas: ': tareas} #se concatenan las tareas registradas
 
+#ENDPOINT POST
+@app.post("/tareas/", tags = ["TAREAS"]) #declarar ruta del servidor
+def guardar(tarea: dict): #recibe un objeto tipo dict
+    for tarea in tarea: 
+        if tarea["id"] == tarea.get("id"): 
+            raise HTTPException(status_code=400, detail="La tarea ya existe") #si el id ya existe se manda un mensaje de error
+    tarea.append(tarea) #se agrega la tarea a la lista
+    return tarea #mensaje de tarea agregada
+
