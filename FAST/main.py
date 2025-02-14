@@ -50,4 +50,4 @@ def delete(id:int, usuarioEliminado: dict): #se utiliza el parámetro obligatori
         if usr["id"] == id: #se verifica que el id coincida en el parámetro
             del usuarios[index] #se elimina el usuario
             return {"mensaje": "Usuario eliminado"} #se regresa el mensaje de usuario eliminado
-    raise HTTPException(status_code = 404, detail = "El usuario no existe") #te manda un mensaje en caso de que no se encuentre el ususario o ya se haa eliminado       
+    raise HTTPException(status_code = 404, detail = "El usuario no existe") #te manda un mensaje en caso de que no se encuentre el ususario o ya se ha eliminado       
