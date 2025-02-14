@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException #Importar la clase FastAPI
+from typing import Optional #Sirve para poder hacer los parámetros opcionales
 
 app = FastAPI(
     title = "Repaso fastAPI",
@@ -43,4 +44,12 @@ def actualizar(id: int, tareaActualizada: dict): #recibe un objeto tipo dict
             return tarea[index] #se regresa la tarea actualizada
     raise HTTPException(status_code = 404, detail = "La tarea no existe") #si no se encuentra la tarea se manda un mensaje de error
 
-    
+#ENDPOINT DELETE
+@app.delete("/tareas/", tags = ["TAREAS"]) #declarar ruta del servidor
+def delete(id: int, tareaEliminada: dict): #se utiliza el parámetro obligatorio y el diccionario que se va a actualizar que en este caso es la tarea
+    for index, tarea in enumerate(tareas):
+        if tarea["id"] == id: #se verifica que el id coincida en el parámetro
+            del tareas[index] #se elimina la tarea
+            return {"mensaje": "Tarea eliminada"} #se regresa el mensaje de tarea eliminada
+    raise HTTPException(status_code = 404, detail = "La tarea no existe") #te manda un mensaje en caso de que no se encuentre la tarea o ya se ha eliminado
+            
