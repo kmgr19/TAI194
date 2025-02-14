@@ -34,3 +34,13 @@ def guardar(tarea: dict): #recibe un objeto tipo dict
     tarea.append(tarea) #se agrega la tarea a la lista
     return tarea #mensaje de tarea agregada
 
+#ENDPOINT ACTUALIZAR
+@app.put("/tareas/{id}", tags = ["TAREAS"]) #declarar ruta del servidor
+def actualizar(id: int, tareaActualizada: dict): #recibe un objeto tipo dict
+    for index, tarea in enumerate(tareas): #se recorre la lista de tareas y se enumeran para saber la posición
+        if tarea["id"] == id: #se verifica que el id coincida en el parámetro
+            tareas[index].update(tareaActualizada) #se actualiza la tarea
+            return tarea[index] #se regresa la tarea actualizada
+    raise HTTPException(status_code = 404, detail = "La tarea no existe") #si no se encuentra la tarea se manda un mensaje de error
+
+    
