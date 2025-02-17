@@ -8,48 +8,41 @@ app = FastAPI(
 ) #MANDAR AL CONSTRUCTOR QUE QUEREMOS QUE TENGA ESTE OBJETO CUSNDO SE INICIE, TODO SE HARÁ A TRAVÉS DE ESE OBJETO
 
 tareas = [
-    {"id":1, "tarea":"Hacer tarea de matemáticas", "estado":"pendiente"},
-    {"id":2, "tarea":"Hacer tarea de español", "estado":"pendiente"},
-    {"id":3, "tarea":"Hacer tarea de historia", "estado":"pendiente"},
-    {"id":4, "tarea":"Hacer tarea de inglés", "estado":"pendiente"},
-    {"id":5, "tarea":"Hacer tarea de ciencias", "estado":"pendiente"},
-    {"id":6, "tarea":"Hacer tarea de educación física", "estado":"pendiente"},
-    {"id":7, "tarea":"Hacer tarea de artes", "estado":"pendiente"},
+    {"id":1, "título":"Desarrollar una aplicación móvil", "descripción":"Crear una aplicación para gestión de calificaciones", "vencimiento": "17-02-2025", "estado":"pendiente"},
+    {"id":2, "título":"Desarrollar una base de datos", "descripción":"Crear y mejorar la estructura de una BD", "vencimiento": "24-02-2025", "estado":"pendiente"},
+    {"id":3, "título":"Implementación de diseño", "descripción":"Implementar el diseño de la aplicación", "vencimiento": "03-03-2025", "estado":"pendiente"},
+    {"id":4, "título":"Desarrollar una api", "descripción":"Desarrollar una api que tenga funciones de un CRUD", "vencimiento": "13-03-2025", "estado":"pendiente"},
+    {"id":5, "título":"Subir al repositorio", "descripción":"Subir la aplicación en un repositorio", "vencimiento": "17-03-2025", "estado":"pendiente"},
 ]
 
-#CREAR PRIMERA RUTA O ENDPOINT
-app.get("/", tags = ["inicio"]) #declarar ruta del servidor
-def home():
-    return {'BIENVENIDO': 'TAREAS'} #mensaje que se mpstrará en la ruta del servidor
-
-@app.get("/tareas", tags = ["tareas"]) #declarar ruta del servidor
+#ENDPOINT CONSULTA TODOS
+@app.get("/tareas", tags = ["TAREAS"]) #declarar ruta del servidor
 def leer():
     return {'Tareas Registradas: ': tareas} #se concatenan las tareas registradas
 
-#ENDPOINT POST
-@app.post("/tareas/", tags = ["TAREAS"]) #declarar ruta del servidor
-def guardar(tarea: dict): #recibe un objeto tipo dict
-    for tarea in tarea: 
-        if tarea["id"] == tarea.get("id"): 
-            raise HTTPException(status_code=400, detail="La tarea ya existe") #si el id ya existe se manda un mensaje de error
-    tarea.append(tarea) #se agrega la tarea a la lista
-    return tarea #mensaje de tarea agregada
+@app.post("/tareas/", tags = ["TAREAS"])#declarar ruta del servidor
+def guardar(tarea: dict): #se recibe un diccionario, después de los : es el tipo de dato que se está solicitando
+    for task in tareas: #recorrer la lista de usuarios
+        if task["id"] == tarea.get("id"): #si es igual al usuario de la petición
+            raise HTTPException(status_code=400, detail="El usuario ya existe") #raise: marca un punto de quiebre, el status code se refiere a un error en específico
+
+    tareas.append(tarea) #agregar el usuario a la lista
+    return tarea #mensaje de usuario agregado    
 
 #ENDPOINT ACTUALIZAR
 @app.put("/tareas/{id}", tags = ["TAREAS"]) #declarar ruta del servidor
-def actualizar(id: int, tareaActualizada: dict): #recibe un objeto tipo dict
-    for index, tarea in enumerate(tareas): #se recorre la lista de tareas y se enumeran para saber la posición
-        if tarea["id"] == id: #se verifica que el id coincida en el parámetro
+def actualizar(id:int, tareaActualizada:dict): #recibe un objeto tipo dict
+    for index, task in enumerate(tareas): #se recorre la lista de tareas y se enumeran para saber la posición
+        if task["id"] == id: #se verifica que el id coincida en el parámetro
             tareas[index].update(tareaActualizada) #se actualiza la tarea
-            return tarea[index] #se regresa la tarea actualizada
+            return tareas[index] #se regresa la tarea actualizada
     raise HTTPException(status_code = 404, detail = "La tarea no existe") #si no se encuentra la tarea se manda un mensaje de error
 
 #ENDPOINT DELETE
 @app.delete("/tareas/", tags = ["TAREAS"]) #declarar ruta del servidor
-def delete(id: int, tareaEliminada: dict): #se utiliza el parámetro obligatorio y el diccionario que se va a actualizar que en este caso es la tarea
-    for index, tarea in enumerate(tareas):
-        if tarea["id"] == id: #se verifica que el id coincida en el parámetro
+def delete(id: int): #recibe un objeto tipo dict
+    for index, task in enumerate(tareas): #se recorre la lista de tareas y se enumeran para saber la posición
+        if task["id"] == id: #se verifica que el id coincida en el parámetro
             del tareas[index] #se elimina la tarea
-            return {"mensaje": "Tarea eliminada"} #se regresa el mensaje de tarea eliminada
-    raise HTTPException(status_code = 404, detail = "La tarea no existe") #te manda un mensaje en caso de que no se encuentre la tarea o ya se ha eliminado
-            
+            return {"mensaje": "tarea eliminada"} #se regresa un mensaje de tarea eliminada
+    raise HTTPException(status_code = 404, detail = "La tarea no existe") #si no se encuentra la tarea se manda un mensaje de error
