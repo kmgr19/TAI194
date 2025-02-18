@@ -21,13 +21,12 @@ def leer():
     return {'Tareas Registradas: ': tareas} #se concatenan las tareas registradas
 
 @app.post("/tareas/", tags = ["TAREAS"])#declarar ruta del servidor
-def guardar(tarea: dict): #se recibe un diccionario, después de los : es el tipo de dato que se está solicitando
-    for task in tareas: #recorrer la lista de usuarios
-        if task["id"] == tarea.get("id"): #si es igual al usuario de la petición
-            raise HTTPException(status_code=400, detail="El usuario ya existe") #raise: marca un punto de quiebre, el status code se refiere a un error en específico
-
-    tareas.append(tarea) #agregar el usuario a la lista
-    return tarea #mensaje de usuario agregado    
+def guardar(tareacreada: dict): #se recibe un diccionario, después de los : es el tipo de dato que se está solicitando
+    for task in tareas: #recorrer la lista de tareas
+        if task["id"] == tareacreada.get("id"): #si es igual al tarea de la petición
+            raise HTTPException(status_code=400, detail="El tarea ya existe") #raise: marca un punto de quiebre, el status code se refiere a un error en específico
+    tareas.append(tareacreada) #agregar el tarea a la lista
+    return tareacreada #mensaje de tarea agregada
 
 #ENDPOINT ACTUALIZAR
 @app.put("/tareas/{id}", tags = ["TAREAS"]) #declarar ruta del servidor
@@ -39,10 +38,13 @@ def actualizar(id:int, tareaActualizada:dict): #recibe un objeto tipo dict
     raise HTTPException(status_code = 404, detail = "La tarea no existe") #si no se encuentra la tarea se manda un mensaje de error
 
 #ENDPOINT DELETE
-@app.delete("/tareas/", tags = ["TAREAS"]) #declarar ruta del servidor
+@app.delete("/tareas/{id}", tags = ["TAREAS"]) #declarar ruta del servidor
 def delete(id: int): #recibe un objeto tipo dict
+    print(f"solicitud delete {id}")
     for index, task in enumerate(tareas): #se recorre la lista de tareas y se enumeran para saber la posición
         if task["id"] == id: #se verifica que el id coincida en el parámetro
             del tareas[index] #se elimina la tarea
+            print(f"tarea con id {id} eliminada")
             return {"mensaje": "tarea eliminada"} #se regresa un mensaje de tarea eliminada
+    print(f"tarea con id {id} no encontrada")
     raise HTTPException(status_code = 404, detail = "La tarea no existe") #si no se encuentra la tarea se manda un mensaje de error
