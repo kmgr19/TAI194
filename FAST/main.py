@@ -1,18 +1,12 @@
 from fastapi import FastAPI, HTTPException #Importar la clase FastAPI
 from typing import Optional, List #Importar los tipos de datos Optional y List
-from pydantic import BaseModel #Importar la clase BaseModel
+from models import modelUsuario #Importar la clase modelUsuario
 
 app = FastAPI(
     title = "Mi primer API",
     desription = "García Rosales Karla María",
     version = "1.0.0"
 ) #MANDAR AL CONSTRUCTOR QUE QUEREMOS QUE TENGA ESTE OBJETO CUSNDO SE INICIE, TODO SE HARÁ A TRAVÉS DE ESE OBJETO
-
-class modelUsuario(BaseModel): #se crea una clase que hereda de BaseModel
-    id: int #se declara un atributo id de tipo entero
-    nombre: str #se declara un atributo nombre de tipo cadena
-    edad: int #se declara un atributo edad de tipo entero
-    correo: str #se declara un atributo correo de tipo cadena
 
 usuarios = [ #se crea una lista de usuarios
     {"id":1, "nombre":"Karla", "edad":20, "correo":"karla@gmail.com"}, 
