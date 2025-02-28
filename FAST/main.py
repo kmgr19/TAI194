@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException #Importar la clase FastAPI
 from typing import Optional, List #Importar los tipos de datos Optional y List
-from models import modelUsuario #Importar la clase modelUsuario
+from models import modelUsuario, modelAuth #importar las model
+from genToken import createToken #importar las genToken
 
 app = FastAPI(
     title = "Mi primer API",
@@ -19,6 +20,16 @@ usuarios = [ #se crea una lista de usuarios
 @app.get("/", tags = ["inicio"])#declarar ruta del servidor
 def home():
     return {'hello': 'world fastApi'} #mensaje que se mpstrará en la ruta del servidor
+
+#ENDPOINT PARA GENERAR TOKEN
+@app.post('/auth', tags = ['Autentificación']) #CREACIÓN DEL POST PARA GENERAR TOKEN
+def auth(credenciales: modelAuth):  #DEFINICIÓN DE LAS CREDENCIALES
+    if credenciales.mail == 'kmaria.grosales@gmail.com' and credenciales.passw == '123456789': #SE CREA UN USUARIO ESTÁTICO CON UNA CONTRASEÑA ESTÁTICA
+        token:str = createToken(credenciales.model_dump()) #TODO 
+        print(token)
+        return {"AVISO": "TOKEN GENERADO"}    
+    else:
+        return {"AVISO": "USUARIO NO CUENTA CON LAS CREDENCIALLES"}    
 
 #ENDPOINT CONSULTA TODOS
 @app.get("/todosUsuarios", response_model = List[modelUsuario], tags = ["Operaciones CRUD"]) #declarar ruta del servidor
