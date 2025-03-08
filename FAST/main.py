@@ -1,11 +1,13 @@
-from fastapi import FastAPI, HTTPException #Importar la clase FastAPI
+from fastapi import FastAPI, HTTPException, Depends #Importar la clase FastAPI, HTTPException  y Depends
+from fastapi.responses import JSONResponse
 from typing import Optional, List #Importar los tipos de datos Optional y List
 from models import modelUsuario, modelAuth #importar las model
 from genToken import createToken #importar las genToken
+from middlewares import BearerJWT # importar las middlewares
 
 app = FastAPI(
     title = "Mi primer API",
-    desription = "García Rosales Karla María",
+    description = "García Rosales Karla María",
     version = "1.0.0"
 ) #MANDAR AL CONSTRUCTOR QUE QUEREMOS QUE TENGA ESTE OBJETO CUSNDO SE INICIE, TODO SE HARÁ A TRAVÉS DE ESE OBJETO
 
@@ -25,15 +27,16 @@ def home():
 @app.post('/auth', tags = ['Autentificación']) #CREACIÓN DEL POST PARA GENERAR TOKEN
 def auth(credenciales: modelAuth):  #DEFINICIÓN DE LAS CREDENCIALES
     if credenciales.mail == 'kmaria.grosales@gmail.com' and credenciales.passw == '123456789': #SE CREA UN USUARIO ESTÁTICO CON UNA CONTRASEÑA ESTÁTICA
-        token:str = createToken(credenciales.model_dump()) #TODO 
+        token:str = createToken(credenciales.model_dump()) 
         print(token)
-        return {"AVISO": "TOKEN GENERADO"}    
+        return JSONResponse(content = token)
     else:
         return {"AVISO": "USUARIO NO CUENTA CON LAS CREDENCIALLES"}    
 
 #ENDPOINT CONSULTA TODOS
-@app.get("/todosUsuarios", response_model = List[modelUsuario], tags = ["Operaciones CRUD"]) #declarar ruta del servidor
-def leer():
+@app.get("/todosUsuarios/", response_model = List[modelUsuario], tags = ["Operaciones CRUD"]) #declarar ruta del servidor
+def leer(token: dict = Depends(BearerJWT())):
+    print ("aviso", token)
     return usuarios #se regresa la lista de usuarios
 
 #ENDPOINT POST
