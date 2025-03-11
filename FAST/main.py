@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Depends #Importar la clase FastAPI, HTTPException  y Depends
 from fastapi.responses import JSONResponse
 from typing import Optional, List #Importar los tipos de datos Optional y List
-from models import modelUsuario, modelAuth #importar las model
+from Examen2doP.models import modelUsuario, modelAuth #importar las model
 from genToken import createToken #importar las genToken
 from middlewares import BearerJWT # importar las middlewares
 
