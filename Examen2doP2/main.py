@@ -16,12 +16,12 @@ vehiculos = [
 
 
 @app.post("/registro/", tags = ["REGISTRO"])
-def guardar(registro: modelVehiculo): 
-    for registro in vehiculos: 
-        if registro["id"] == registro.id:
+def guardar(nuevo_registro: modelVehiculo): 
+    for vehiculo in vehiculos: 
+        if vehiculo["id"] == nuevo_registro.id:
             raise HTTPException(status_code=400, detail="El vehiculo ya existe")
-    vehiculos.append(registro)
-    return registro
+    vehiculos.append(nuevo_registro.dict())
+    return nuevo_registro
 
 #endpoint para buscar un vehiculo por placa
 @app.get("/vehiculos/{placa}", tags = ["VEHICULOS"])
