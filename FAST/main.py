@@ -1,15 +1,19 @@
 from fastapi import FastAPI, HTTPException, Depends #Importar la clase FastAPI, HTTPException  y Depends
 from fastapi.responses import JSONResponse
 from typing import Optional, List #Importar los tipos de datos Optional y List
-from Examen2doP.models import modelUsuario, modelAuth #importar las model
+from modelsPydantic import modelUsuario, modelAuth #importar las model
 from genToken import createToken #importar las genToken
 from middlewares import BearerJWT # importar las middlewares
+from DB.conexion import Session, engine, Base #importar las clases de la base de datos
+from models.modelsDB import User #importar la clase User
 
 app = FastAPI(
     title = "Mi primer API",
     description = "García Rosales Karla María",
     version = "1.0.0"
 ) #MANDAR AL CONSTRUCTOR QUE QUEREMOS QUE TENGA ESTE OBJETO CUSNDO SE INICIE, TODO SE HARÁ A TRAVÉS DE ESE OBJETO
+
+Base.metadata.create_all(bind = engine) #CREAR LAS TABLAS EN LA BASE DE DATOS
 
 usuarios = [ #se crea una lista de usuarios
     {"id":1, "nombre":"Karla", "edad":20, "correo":"karla@gmail.com"}, 
@@ -21,7 +25,7 @@ usuarios = [ #se crea una lista de usuarios
 #CREAR PRIMERA RUTA O ENDPOINT
 @app.get("/", tags = ["inicio"])#declarar ruta del servidor
 def home():
-    return {'hello': 'world fastApi'} #mensaje que se mpstrará en la ruta del servidor
+    return {'hello': 'world fastApi'} #mensaje que se mostrará en la ruta del servidor
 
 #ENDPOINT PARA GENERAR TOKEN
 @app.post('/auth', tags = ['Autentificación']) #CREACIÓN DEL POST PARA GENERAR TOKEN
@@ -42,12 +46,18 @@ def leer(token: dict = Depends(BearerJWT())):
 #ENDPOINT POST
 @app.post("/usuarios/",  response_model = modelUsuario, tags = ["Operaciones CRUD"]) #declarar ruta del servidor
 def guardar(usuario: modelUsuario): #se recibe un objeto usando la clase modelUsuario  
-    for usr in usuarios: #recorrer la lista de usuarios
-        if usr["id"] == usuario.id: #si es igual al usuario de la petición 
-            raise HTTPException(status_code=400, detail="El usuario ya existe") #raise: marca un punto de quiebre, el status code se refiere a un error en específico
+    db = Session()
+    try: 
+        db.add(User(**usuario.model_dump())) #se agrega el usuario a la base de datos
+        db.commit() #se guardan los cambios
+        return JSONResponse(status_code = 201, content = {"message": "Usuario guardado", "usuario": usuario.model_dump()}) #se regresa un mensaje de usuario guardado
 
-    usuarios.append(usuario) #agregar el usuario a la lista
-    return usuario #mensaje de usuario agregado    
+    except Exception as e: #error en la base de datos
+        db.rollback()
+        return JSONResponse(status_code = 500, content = {"message": "ERROR: Usuario no guardado", "Error": str(e)}) #se regresa un mensaje de error en caso de que no se haya guardado el usuario
+
+    finally:  
+        db.close() #se cierra la conexión con la base de datos 
 
 #ENDPOINT ACTUALIZAR
 @app.put("/usuarios/{id}", response_model= modelUsuario, tags = ["Operaciones CRUD"]) #{} es un parámetro obligatorio que en este caso es el id

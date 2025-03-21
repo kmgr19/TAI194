@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException #Importar la clase FastAPI, HTTPException  y Depends
 from fastapi.responses import JSONResponse
 from typing import Optional, List #Importar los tipos de datos Optional y List
-from models import modelVehiculo #importar las model
+from Examen2doP2.modelsPydantic import modelVehiculo #importar las model
 
 app = FastAPI(
     title = "Examen"
@@ -10,7 +10,8 @@ app = FastAPI(
 vehiculos = [
     {"id": 1, "modelo": "Audi", "año": "2021", "placa": "UMZ234S"},
     {"id": 2, "modelo": "Toyota", "año": "2020", "placa": "UMZ234S"},
-    {"id": 3, "modelo": "Mazda", "año": "2019", "placa": "UMZ234S"}
+    {"id": 3, "modelo": "Mazda", "año": "2019", "placa": ""
+    ""}
 ]
 
 
