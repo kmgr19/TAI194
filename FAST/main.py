@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, Depends #Importar la clase FastAPI, HTTPException  y Depends
+from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from typing import Optional, List #Importar los tipos de datos Optional y List
 from modelsPydantic import modelUsuario, modelAuth #importar las model
@@ -38,10 +39,37 @@ def auth(credenciales: modelAuth):  #DEFINICIÓN DE LAS CREDENCIALES
         return {"AVISO": "USUARIO NO CUENTA CON LAS CREDENCIALLES"}    
 
 #ENDPOINT CONSULTA TODOS
-@app.get("/todosUsuarios/", response_model = List[modelUsuario], tags = ["Operaciones CRUD"]) #declarar ruta del servidor
-def leer(token: dict = Depends(BearerJWT())):
-    print ("aviso", token)
-    return usuarios #se regresa la lista de usuarios
+@app.get("/todosUsuarios/", tags = ["Operaciones CRUD"]) #Declara la ruta del servidor para realizar la operación de obtener todos los usuarios
+def leer(): #Define la función que se encargará de recuperar todos los usuarios registrados en la base de datos
+    db = Session() #Crea una nueva sesión con la base de datos para interactuar con ella
+    try:
+        consulta = db.query(User).all() #Realiza una consulta en la base de datos para obtener todos los registros de la tabla `User`
+        return JSONResponse(content = jsonable_encoder(consulta)) #Devuelve una respuesta JSON con los datos de todos los usuarios, codificados correctamente para JSON
+    
+    except Exception as e: #Bloque para manejar errores que puedan ocurrir durante la operación de consulta
+        db.rollback() #Revierte cualquier cambio realizado en la sesión en caso de que ocurra un error
+        return JSONResponse(status_code = 500, content = {"message": "NO FUE POSIBLE CONSULTAR", "Error": str(e)}) #Devuelve una respuesta JSON con un código de estado HTTP 500 y un mensaje de error indicando que ocurrió un problema
+
+    finally:  
+        db.close() # Cierra la conexión con la base de datos, independientemente de si hubo éxito o error en la consulta.
+
+#ENDPOINT CONSULTA POR ID
+@app.get("/usuario/{id}", tags = ["Operaciones CRUD"]) #declarar ruta del servidor
+def leeruno(id:int): #define la función que recibe como parámetro el id del usuario
+    db = Session() #crea una nueva sesión con la base de datos
+    try:
+        consulta1 = db.query(User).filter(User.id == id).first() #realiza una consulta en la base de datos para obtener el usuario cuyo id coincida con el parámetro 'id'
+        if not consulta1: #verifica si el usuario no fue encontrado
+            return JSONResponse(status_code = 404, content = {"mensaje": "USUARIO NO ENCONTRADO"})  #Devuelve una respuesta JSON con un código de estado HTTP 404 y un mensaje indicando que el usuario no fue encontrado
+        
+        return JSONResponse(content = jsonable_encoder(consulta1)) #Devuelve una respuesta JSON con los datos del usuario encontrado, codificados correctamente para JSON
+    
+    except Exception as e: #Bloque para manejar errores que puedan ocurrir durante la consulta a la base de datos
+        db.rollback()
+        return JSONResponse(status_code = 500, content = {"message": "NO FUE POSIBLE CONSULTAR", "Error": str(e)}) #se regresa un mensaje de error en caso de que no se haya guardado el usuario
+
+    finally:  
+        db.close() #se cierra la conexión con la base de datos 
 
 #ENDPOINT POST
 @app.post("/usuarios/",  response_model = modelUsuario, tags = ["Operaciones CRUD"]) #declarar ruta del servidor
