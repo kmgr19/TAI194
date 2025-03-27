@@ -87,20 +87,45 @@ def guardar(usuario: modelUsuario): #se recibe un objeto usando la clase modelUs
     finally:  
         db.close() #se cierra la conexión con la base de datos 
 
-#ENDPOINT ACTUALIZAR
-@app.put("/usuarios/{id}", response_model= modelUsuario, tags = ["Operaciones CRUD"]) #{} es un parámetro obligatorio que en este caso es el id
-def actualizar(id:int, usuarioActualizado: modelUsuario): #se utiliza el parámetro obligatorio y el diccionario que se va a actualizar que en este caso es el usuario
-    for index, usr in enumerate(usuarios): #se recorre la lista de usuarios y se enumeran para saber la posición en la que se encuentran
-        if usr["id"] == id: #se verifica que el id coincida en el parámetro
-            usuarios[index] = usuarioActualizado.model_dump() #se actualiza el usuario
-            return usuarios[index] #se regresa el usuario actualizado
-    raise HTTPException(status_code = 404, detail = "El usuario no existe") #si no se encuentra el usuario se manda un mensaje de error    
+#ENDPOINT PARA ACTUALIZAR
+@app.put('/Usuarios/{id}', response_model=modelUsuario, tags=['Operaciones CRUD'])
+def actualizar(id: int, usuarioActualizado: modelUsuario):
+    db = Session()
+    try:
+        usuario = db.query(User).filter(User.id == id).first()
+        if not usuario:
+            raise HTTPException(status_code=404, detail="El usuario no existe")
+        
+        for key, value in usuarioActualizado.model_dump().items():
+            setattr(usuario, key, value)
+        
+        db.commit()
+        return usuarioActualizado.model_dump()
 
-#ENDPOINT DELETE
-@app.delete("/usuarios/", tags = ["Operaciones CRUD"]) #DECLARAR LA RUTA DEL SERVIDOR
-def delete(id:int, usuarioEliminado: dict): #se utiliza el parámetro obligatorio y el diccionario que se va a actualizar que en este caso es el usuario
-    for index, usr in enumerate(usuarios): #se recorre la lista de usuarios y se enumeran para saber la posición
-        if usr["id"] == id: #se verifica que el id coincida en el parámetro
-            del usuarios[index] #se elimina el usuario
-            return {"mensaje": "Usuario eliminado"} #se regresa el mensaje de usuario eliminado
-    raise HTTPException(status_code = 404, detail = "El usuario no existe") #te manda un mensaje en caso de que no se encuentre el ususario o ya se ha eliminado       
+    except Exception as e:
+        db.rollback() 
+        return JSONResponse(status_code=500, content={"message": "No fue posible actualizar el usuario", "Error": str(e)})
+    
+    finally:
+        db.close()
+
+#ENDPOINT PARA BORRAR
+@app.delete('/Usuarios/{id}', tags=['Operaciones CRUD'])
+def eliminar(id: int):
+    db = Session()
+    try:
+        
+        usuario = db.query(User).filter(User.id == id).first()
+        if not usuario:
+            raise HTTPException(status_code=404, detail="El usuario no existe")
+        
+        db.delete(usuario)
+        db.commit()
+        return JSONResponse(status_code=200, content={"message": "Usuario eliminado exitosamente"})
+
+    except Exception as e:
+        db.rollback()  
+        return JSONResponse(status_code=500, content={"message": "No fue posible eliminar el usuario", "Error": str(e)})
+    
+    finally:
+        db.close()
